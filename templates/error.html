@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>windowshvisker</title>
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/globals.css') }}">
+        <link rel="icon" type="favicon" href="{{url_for('static',filename='styles/favicon.ico')}}">
+    </head>
+<body>
+    <div class="container">
+        <div class="content-box">
+            <div class="header">
+                <p class="header-title">T-TEX</p>
+            </div>
+        </div>
+        <div class="content-box">
+            <div class="error">
+                <p class="error-info">Der sket en fejl: {{ error }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

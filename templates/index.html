@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>windowshvisker</title>
+    <title>T-TEX @TV 2 FYN</title>
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/globals.css') }}">
     <link rel="icon" type="favicon" href="{{url_for('static',filename='styles/favicon.ico')}}">
     <script src="{{url_for('static', filename='main.js')}}"></script>
@@ -11,20 +11,24 @@
 </head>
 <body>
     <div class="container">
-        <div class="content-box">
-            <div class="header">
-                <p class="header-title">T-TEX</p>
-            </div>
+        <div>
+            <canvas id="gameCanvas" width="800" height="200"></canvas>
+            <script src="{{url_for('static', filename='game.js')}}"></script>
+        </div>    
+
+        <div class="header">
+            <img src="../static/styles/logo.svg" height="37px"/>
+            <p class="header-title">T-TEX</p>
         </div>
         <div class="content-box">
-            <p class="description">Upload din fil for at få den transskriberet</p>
-        </div>
-        <div class="content-box">
-            <form action="/upload" method="POST" enctype="multipart/form-data" onsubmit="return submitForm()">
-                <div class="form">
-                    <input type="file" name="file" id="fileInput">
-                    <input type="submit" value="Upload" class="button">
-                </div>
+            <form id="uploadForm" method="post" enctype="multipart/form-data">
+                <label for="fileInput" class="form" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+                    <div id="dropArea">
+                        <p>Træk din fil hertil eller klik for at vælge en fil</p>
+                        <input type="file" name="file" id="fileInput" style="display: none;" onchange="handleFileSelection(event)">
+                    </div>
+                </label>
+                <input type="submit" id="uploadButton" value="Upload" class="button" style="display: none;">
             </form>
         </div>
     </div>

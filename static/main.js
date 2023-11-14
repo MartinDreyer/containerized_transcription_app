@@ -1,42 +1,48 @@
-const validateForm = () => {
-  const fileInput = document.getElementById("fileInput");
-  if (fileInput.files.length === 0) {
-    alert("Vælg en fil, før du trykker upload");
-    return false; // Prevent form submission
-  }
-  return true; // Allow form submission
+const handleDragOver = (event) => {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "copy";
 };
 
-const submitForm = (e) => {
-  if (validateForm()) {
-    e.preventDefault();
+const handleDrop = (event) => {
+  event.preventDefault();
+  const fileInput = document.getElementById("fileInput");
+  const dropArea = document.getElementById("dropArea");
 
-    fetch("/upload", {
-      method: "POST",
-      body: new FormData(document.querySelector("form")),
+  fileInput.files = event.dataTransfer.files;
+  dropArea.style.border = "2px dashed #ccc";
+
+  submitForm();
+};
+
+const handleFileSelection = (event) => {
+  event.preventDefault();
+  const fileInput = document.getElementById("fileInput");
+  const dropArea = document.getElementById("dropArea");
+
+  fileInput.files = event.target.files;
+  dropArea.style.border = "2px dashed #ccc";
+  submitForm();
+};
+
+const submitForm = () => {
+  const form = document.getElementById("uploadForm");
+  const formData = new FormData(form);
+
+  fetch("/upload", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.blob())
+    .then((blob) => {
+      // Create a download link
+
+      const downloadLink = document.createElement("a");
+      downloadLink.href = URL.createObjectURL(blob);
+      downloadLink.download = "undertekster.srt";
+      // Trigger the download
+      downloadLink.click();
     })
-      .then((response) => response.blob())
-      .then((blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const a = document.createElement("a");
-        a.href = url;
-
-        // Extract the filename from the content-disposition header
-        const contentDisposition = response.headers.get("content-disposition");
-        const filenameMatch =
-          contentDisposition && contentDisposition.match(/filename="(.+)"/);
-        const filename = filenameMatch ? filenameMatch[1] : "download";
-
-        // Set the download attribute and trigger a click to start the download
-        a.setAttribute("download", filename);
-        a.click();
-
-        // Clean up the temporary link
-        window.URL.revokeObjectURL(url);
-      })
-      .catch((error) => {
-        // Handle errors
-        console.error("Error:", error);
-      });
-  }
+    .catch((error) => {
+      console.error("Error: ", error);
+    });
 };

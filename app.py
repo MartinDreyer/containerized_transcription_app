@@ -18,14 +18,6 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def get_resource_path(self, relative_path):
-    '''Get the absolute path to the resource, works for development and PyInstaller'''
-    if hasattr(sys, '_MEIPASS'):
-        # If running as a PyInstaller executable, use sys._MEIPASS
-        return os.path.join(sys._MEIPASS, relative_path)
-    else:
-        # If running as a regular Python script, use the current working directory
-        return os.path.join(os.getcwd(), relative_path)
 
 def transcribe(file_path: str, language: str = 'danish', model_size: str = 'large'):
     try:
@@ -92,11 +84,21 @@ def upload_file():
             base = Path(os.path.join(app.config['UPLOAD_FOLDER'], filename)).stem
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             transcription = transcribe(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+ 
             if transcription:
-                output_to_text_file(transcription, os.path.join(app.config['UPLOAD_FOLDER'], base + '.srt') )
-            
+                # Save transcription to a text file
+                output_to_text_file(transcription, os.path.join(app.config['UPLOAD_FOLDER'], base + '.srt'))
 
-            return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER']), (base + '.srt'), as_attachment=True, download_name=f"{base}.srt")
+                # Send the text file as an attachment
+                response = send_from_directory(
+                    app.config['UPLOAD_FOLDER'],
+                    base + '.srt',
+                    as_attachment=True,
+                    download_name=f"{base}.srt"
+                )
+
+                return response
+
     return '''
     <!doctype html>
     <h1>Upload ny fil</h1>

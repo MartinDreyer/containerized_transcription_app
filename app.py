@@ -84,21 +84,14 @@ def upload_file():
             base = Path(os.path.join(app.config['UPLOAD_FOLDER'], filename)).stem
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             transcription = transcribe(os.path.join(app.config['UPLOAD_FOLDER'], filename))
- 
             if transcription:
-                # Save transcription to a text file
-                output_to_text_file(transcription, os.path.join(app.config['UPLOAD_FOLDER'], base + '.srt'))
+                output_to_text_file(transcription, os.path.join(app.config['UPLOAD_FOLDER'], base + '.srt') )
 
-                # Send the text file as an attachment
-                response = send_from_directory(
-                    app.config['UPLOAD_FOLDER'],
-                    base + '.srt',
-                    as_attachment=True,
-                    download_name=f"{base}.srt"
-                )
-
-                return response
-
+            response = send_from_directory(app.config['UPLOAD_FOLDER'], (base + '.srt'), as_attachment=True, download_name=f"{base}.srt")
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], base + '.srt') )
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        
+            return response
     return '''
     <!doctype html>
     <h1>Upload ny fil</h1>

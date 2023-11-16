@@ -5,7 +5,7 @@ import whisper
 import traceback
 import sys
 from pathlib import Path
-
+import time
 
 
 UPLOAD_FOLDER = 'uploads'
@@ -57,6 +57,7 @@ def output_to_text_file(data_dict: dict, output_file_name: str):
                 file.write(f'{start_time_str} --> {end_time_str}\n')
                 file.write(f'{text}\n\n')
                 index += 1
+            file.close()
 
     except Exception as e:
         print(f'Fejl ved skrivning til tekstfil: {e}')
@@ -87,11 +88,9 @@ def upload_file():
             if transcription:
                 output_to_text_file(transcription, os.path.join(app.config['UPLOAD_FOLDER'], base + '.srt') )
 
-            response = send_from_directory(app.config['UPLOAD_FOLDER'], (base + '.srt'), as_attachment=True, download_name=f"{base}.srt")
-            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], base + '.srt') )
-            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        
-            return response
+                response = send_from_directory(app.config['UPLOAD_FOLDER'], (base + '.srt'), as_attachment=True, download_name=f"{base}.srt")
+            
+        return response
     return '''
     <!doctype html>
     <h1>Upload ny fil</h1>

@@ -1,11 +1,11 @@
 import os
-from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
+from flask import Flask, flash, request, redirect, url_for, render_template, send_file
 from werkzeug.utils import secure_filename
 import whisper
 import traceback
 import sys
 from pathlib import Path
-import time
+import io
 
 
 UPLOAD_FOLDER = 'uploads'
@@ -87,10 +87,17 @@ def upload_file():
             transcription = transcribe(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             if transcription:
                 output_to_text_file(transcription, os.path.join(app.config['UPLOAD_FOLDER'], base + '.srt') )
+                with open(os.path.join(app.config['UPLOAD_FOLDER'], (base + '.srt')), 'rb') as f:
+                    data = io.BytesIO(f.read())
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], base + '.srt'))
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                response = send_file(
+                    data,
+                    as_attachment=True,
+                    download_name=f"{base}.srt",
+                )
 
-                response = send_from_directory(app.config['UPLOAD_FOLDER'], (base + '.srt'), as_attachment=True, download_name=f"{base}.srt")
-            
-        return response
+            return response
     return '''
     <!doctype html>
     <h1>Upload ny fil</h1>

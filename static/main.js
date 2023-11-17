@@ -1,3 +1,12 @@
+const replaceExtension = (fileName) => {
+  const parts = fileName.split(".");
+  if (parts.length > 1) {
+    parts[parts.length - 1] = "srt";
+
+    return parts.join(".");
+  }
+};
+
 const handleDragOver = (event) => {
   event.preventDefault();
   event.dataTransfer.dropEffect = "copy";
@@ -27,20 +36,31 @@ const handleFileSelection = (event) => {
 const submitForm = () => {
   const form = document.getElementById("uploadForm");
   const formData = new FormData(form);
+  const fileInput = document.getElementById("fileInput");
+  const fileName = replaceExtension(fileInput.files[0].name);
 
   fetch("/upload", {
     method: "POST",
     body: formData,
   })
-    .then((response) => response.blob())
-    .then((blob) => {
-      // Create a download link
+    .then((response) => {
+      // Check if the request was successful (status code 2xx)
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
 
-      const downloadLink = document.createElement("a");
-      downloadLink.href = URL.createObjectURL(blob);
-      downloadLink.download = "undertekster.srt";
-      // Trigger the download
-      downloadLink.click();
+      // Return the blob promise
+      return response.blob();
+    })
+    .then((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
     })
     .catch((error) => {
       console.error("Error: ", error);
